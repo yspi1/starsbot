@@ -1,0 +1,432 @@
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Stars Slot</title>
+            <style>
+                /* Общие стили */
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    color: white;
+                    overflow: hidden;
+                }
+
+                /* Видео-фон */
+                #video-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    z-index: -1;
+                }
+
+                .container {
+                    background: rgba(0, 0, 0, 0.7);
+                    padding: 20px;
+                    border-radius: 10px;
+                    text-align: center;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                    z-index: 1;
+                }
+
+                .button {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    margin: 10px;
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    transition: background-color 0.3s ease;
+                }
+
+                .button:hover {
+                    background-color: #0056b3;
+                }
+
+                input[type="number"] {
+                    padding: 10px;
+                    font-size: 16px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    width: 200px;
+                    margin-bottom: 10px;
+                }
+
+                .slot-machine {
+                    display: flex;
+                    justify-content: center;
+                    gap: 10px;
+                    margin: 20px 0;
+                }
+
+                .slot {
+                    width: 80px;
+                    height: 80px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 2px solid #007bff;
+                    border-radius: 10px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 40px;
+                    overflow: hidden;
+                    position: relative;
+                }
+
+                .slot .symbols {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    transition: top 2s ease-out;
+                }
+
+                .slot .symbol {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 80px;
+                }
+
+                .balance {
+                    font-size: 20px;
+                    margin-bottom: 20px;
+                }
+
+                .result {
+                    font-size: 24px;
+                    margin-top: 20px;
+                }
+
+                .bet-controls {
+                    display: flex;
+                    justify-content: center;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                }
+
+                .bet-controls button {
+                    padding: 5px 10px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    background-color: rgba(255, 255, 255, 0.1);
+                    border: 1px solid #007bff;
+                    color: white;
+                    border-radius: 5px;
+                    transition: background-color 0.3s ease;
+                }
+
+                .bet-controls button:hover {
+                    background-color: rgba(255, 255, 255, 0.2);
+                }
+
+                .menu-icon {
+                    position: absolute;
+                    top: 20px;
+                    left: 20px;
+                    cursor: pointer;
+                    font-size: 24px;
+                    z-index: 2;
+                }
+
+                .menu {
+                    position: absolute;
+                    top: 60px;
+                    left: 20px;
+                    background: rgba(0, 0, 0, 0.8);
+                    border-radius: 5px;
+                    display: none;
+                    flex-direction: column;
+                    gap: 10px;
+                    padding: 10px;
+                    z-index: 2;
+                }
+
+                .menu button {
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 16px;
+                    cursor: pointer;
+                    text-align: left;
+                }
+
+                .menu button:hover {
+                    color: #007bff;
+                }
+
+                /* Анимация выигрыша */
+                @keyframes explode {
+                    0% { transform: scale(1); opacity: 1; }
+                    100% { transform: scale(3); opacity: 0; }
+                }
+
+                .win-animation {
+                    position: absolute;
+                    font-size: 24px;
+                    animation: explode 1s ease-out;
+                }
+
+                /* Анимация проигрыша */
+                @keyframes sad {
+                    0% { transform: translateY(0); opacity: 1; }
+                    100% { transform: translateY(100px); opacity: 0; }
+                }
+
+                .lose-animation {
+                    position: absolute;
+                    font-size: 24px;
+                    animation: sad 1s ease-out;
+                }
+            </style>
+        </head>
+        <body>
+            <!-- Видео-фон -->
+            <video id="video-background" autoplay muted loop>
+                <source src="IMG_1032.MP4" type="video/mp4">
+                Ваш браузер не поддерживает видео.
+            </video>
+
+            <!-- Иконка меню -->
+            <div class="menu-icon" onclick="toggleMenu()">☰</div>
+
+            <!-- Выпадающее меню -->
+            <div class="menu" id="menu">
+                <button onclick="openGames()">Игры</button>
+                <button onclick="window.location.href='profile.html'">Профиль</button>
+                <button onclick="openWithdraw()">Вывод</button>
+                <button onclick="openDeposit()">Депозит</button>
+                <button onclick="openSupport()">Поддержка</button>
+                <button onclick="openTransactionHistory()">История транзакций</button>
+            </div>
+
+            <!-- Основной контейнер -->
+            <div class="container">
+                <h1>Stars Slot</h1>
+                <div class="balance">Баланс: <span id="balance">100</span> звезд</div>
+                <input type="number" id="bet" placeholder="Введите ставку (10-100,000)" min="10" max="100000" value="10">
+
+                <div class="bet-controls">
+                    <button onclick="addToBet(10)">+10</button>
+                    <button onclick="addToBet(50)">+50</button>
+                    <button onclick="addToBet(100)">+100</button>
+                    <button onclick="addToBet(500)">+500</button>
+                    <button onclick="multiplyBet(2)">x2</button>
+                    <button onclick="divideBet(2)">/2</button>
+                    <button onclick="setMinBet()">Мин ставка</button>
+                </div>
+
+                <button class="button" onclick="spin()">Крутить</button>
+
+                <div class="slot-machine">
+                    <div class="slot" id="slot1">
+                        <div class="symbols" id="symbols1">
+                            <div class="symbol">🍒</div>
+                            <div class="symbol">💎</div>
+                            <div class="symbol">💰</div>
+                            <div class="symbol">🍎</div>
+                            <div class="symbol">🍀</div>
+                            <div class="symbol">🎰</div>
+                        </div>
+                    </div>
+                    <div class="slot" id="slot2">
+                        <div class="symbols" id="symbols2">
+                            <div class="symbol">🍒</div>
+                            <div class="symbol">💎</div>
+                            <div class="symbol">💰</div>
+                            <div class="symbol">🍎</div>
+                            <div class="symbol">🍀</div>
+                            <div class="symbol">🎰</div>
+                        </div>
+                    </div>
+                    <div class="slot" id="slot3">
+                        <div class="symbols" id="symbols3">
+                            <div class="symbol">🍒</div>
+                            <div class="symbol">💎</div>
+                            <div class="symbol">💰</div>
+                            <div class="symbol">🍎</div>
+                            <div class="symbol">🍀</div>
+                            <div class="symbol">🎰</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result" id="result"></div>
+            </div>
+
+            <script>
+                let balance = 100; // Начальный баланс
+                const minBet = 10; // Минимальная ставка
+
+                // Символы для барабанов
+                const symbols = ["🍒", "💎", "💰", "🍎", "🍀", "🎰"];
+
+                // Функция для вращения барабанов
+                function spin() {
+                    const betInput = document.getElementById('bet');
+                    const bet = parseInt(betInput.value);
+
+                    // Проверка ставки
+                    if (isNaN(bet) || bet < minBet || bet > 100000) {
+                        alert(`Введите корректную ставку (от ${minBet} до 100,000)!`);
+                        return;
+                    }
+                    if (bet > balance) {
+                        alert('Недостаточно звезд на балансе!');
+                        return;
+                    }
+
+                    // Снимаем ставку с баланса
+                    balance -= bet;
+                    updateBalance();
+
+                    // Анимация вращения барабанов
+                    const slots = ["slot1", "slot2", "slot3"];
+                    const results = [];
+
+                    slots.forEach((slotId, index) => {
+                        const slot = document.getElementById(slotId);
+                        const symbolsElement = slot.querySelector('.symbols');
+                        const randomOffset = Math.floor(Math.random() * 6) * 80; // Случайное смещение
+                        symbolsElement.style.top = `-${randomOffset}px`;
+
+                        // Определяем выпавший символ
+                        const symbolIndex = Math.floor(Math.abs(randomOffset) / 80);
+                        results[index] = symbols[symbolIndex];
+                    });
+
+                    // Задержка перед проверкой выигрыша
+                    setTimeout(() => {
+                        checkWin(results, bet);
+                    }, 2000); // Длительность анимации
+                }
+
+                // Функция для проверки выигрыша
+                function checkWin(results, bet) {
+                    let winMultiplier = 0;
+                    if (results[0] === results[1] && results[1] === results[2]) {
+                        switch (results[0]) {
+                            case "💎": winMultiplier = 2; break; // 3 алмаза = x2
+                            case "💰": winMultiplier = 5; break; // 3 купюры = x5
+                            case "🍎": winMultiplier = 1; break; // 3 яблока = x1
+                            case "🎰": winMultiplier = 25; break; // 3 джекпота = x25
+                            default: winMultiplier = 0; break; // Другие комбинации = x0
+                        }
+                    }
+
+                    const winAmount = bet * winMultiplier;
+                    balance += winAmount;
+                    updateBalance();
+
+                    // Отображение результата
+                    const resultElement = document.getElementById('result');
+                    if (winMultiplier > 0) {
+                        resultElement.textContent = `Вы выиграли ${winAmount} звезд!`;
+                        createWinAnimation();
+                    } else {
+                        resultElement.textContent = "Вы проиграли. Попробуйте еще раз!";
+                        createLoseAnimation();
+                    }
+                }
+
+                // Функция для создания анимации выигрыша
+                function createWinAnimation() {
+                    for (let i = 0; i < 20; i++) {
+                        const star = document.createElement('div');
+                        star.textContent = '⭐';
+                        star.classList.add('win-animation');
+                        star.style.left = `${Math.random() * 100}%`;
+                        star.style.top = `${Math.random() * 100}%`;
+                        document.body.appendChild(star);
+                        setTimeout(() => star.remove(), 1000);
+                    }
+                }
+
+                // Функция для создания анимации проигрыша
+                function createLoseAnimation() {
+                    for (let i = 0; i < 10; i++) {
+                        const sadFace = document.createElement('div');
+                        sadFace.textContent = '😢';
+                        sadFace.classList.add('lose-animation');
+                        sadFace.style.left = `${Math.random() * 100}%`;
+                        sadFace.style.top = `${Math.random() * 100}%`;
+                        document.body.appendChild(sadFace);
+                        setTimeout(() => sadFace.remove(), 1000);
+                    }
+                }
+
+                // Функция для обновления баланса
+                function updateBalance() {
+                    document.getElementById('balance').textContent = balance;
+                }
+
+                // Функции для управления ставкой
+                function addToBet(amount) {
+                    const betInput = document.getElementById('bet');
+                    let currentBet = parseInt(betInput.value);
+                    currentBet += amount;
+                    if (currentBet > 100000) currentBet = 100000;
+                    betInput.value = currentBet;
+                }
+
+                function multiplyBet(factor) {
+                    const betInput = document.getElementById('bet');
+                    let currentBet = parseInt(betInput.value);
+                    currentBet *= factor;
+                    if (currentBet > 100000) currentBet = 100000;
+                    betInput.value = currentBet;
+                }
+
+                function divideBet(divisor) {
+                    const betInput = document.getElementById('bet');
+                    let currentBet = parseInt(betInput.value);
+                    currentBet = Math.floor(currentBet / divisor);
+                    if (currentBet < minBet) currentBet = minBet;
+                    betInput.value = currentBet;
+                }
+
+                function setMinBet() {
+                    const betInput = document.getElementById('bet');
+                    betInput.value = minBet;
+                }
+
+                // Функции для меню
+                function toggleMenu() {
+                    const menu = document.getElementById('menu');
+                    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+                }
+
+                function openGames() {
+                    alert('Игры');
+                }
+
+                function openWithdraw() {
+                    alert('Вывод');
+                }
+
+                function openDeposit() {
+                    alert('Депозит');
+                }
+
+                function openSupport() {
+                    alert('Поддержка');
+                }
+
+                function openTransactionHistory() {
+                    alert('История транзакций');
+                }
+            </script>
+        </body>
+        </html>

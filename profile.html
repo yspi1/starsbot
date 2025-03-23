@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            overflow: hidden; /* Убираем прокрутку */
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #000; /* Черный фон для космоса */
+        }
+
+        /* Меню */
+        .menu-icon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 2;
+        }
+
+        .menu {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            z-index: 2;
+        }
+
+        .menu button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .menu button:hover {
+            color: #007bff;
+        }
+
+        /* Контейнер для звезд */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: -1; /* Звезды будут позади контента */
+            overflow: hidden;
+        }
+
+        /* Звезды */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: fly 2s linear forwards, fadeOut 2s ease-in-out forwards;
+        }
+
+        /* Анимация полета звезд */
+        @keyframes fly {
+            0% {
+                transform: translateX(-100%) translateY(-100%);
+            }
+            100% {
+                transform: translateX(100vw) translateY(100vh);
+            }
+        }
+
+        /* Анимация исчезновения следа */
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Контейнер профиля */
+        .profile-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 1s ease-in-out;
+            position: relative;
+            z-index: 1; /* Контент будет поверх звезд */
+        }
+
+        /* Заголовок профиля */
+        .profile-header h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Аватарка */
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar:hover {
+            transform: scale(1.1);
+        }
+
+        /* Юзернейм */
+        #username {
+            font-size: 20px;
+            margin: 10px 0;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Баланс */
+        .balance {
+            font-size: 18px;
+            color: #fff;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .balance span {
+            font-weight: bold;
+            color: #ffdd57;
+        }
+
+        /* Анимация появления */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Иконка меню -->
+    <div class="menu-icon" onclick="toggleMenu()">☰</div>
+
+    <!-- Выпадающее меню -->
+    <div class="menu" id="menu">
+        <button onclick="window.location.href='index.html'">Игры</button>
+        <button onclick="window.location.href='profile.html'">Профиль</button>
+        <button onclick="openWithdraw()">Вывод</button>
+        <button onclick="openDeposit()">Депозит</button>
+        <button onclick="openSupport()">Поддержка</button>
+        <button onclick="openTransactionHistory()">История транзакций</button>
+    </div>
+
+    <!-- Контейнер для звезд -->
+    <div class="stars"></div>
+
+    <!-- Контейнер профиля -->
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1 id="profile-name">Профиль</h1>
+        </div>
+        <div class="profile-content">
+            <img id="avatar" src="" alt="Аватарка" class="avatar">
+            <h2 id="username">Юзернейм</h2>
+            <p class="balance">Баланс: <span id="balance">0</span> ₽</p>
+        </div>
+    </div>
+
+    <script>
+        // Функция для переключения меню
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        // Закрыть меню при клике вне его
+        window.onclick = function(event) {
+            if (!event.target.matches('.menu-icon')) {
+                const menu = document.getElementById('menu');
+                if (menu.style.display === 'flex') {
+                    menu.style.display = 'none';
+                }
+            }
+        }
+
+        // Генерация звезд
+        const starsContainer = document.querySelector('.stars');
+
+        function createStar() {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            starsContainer.appendChild(star);
+
+            // Удаляем звезду после завершения анимации
+            star.addEventListener('animationend', () => {
+                star.remove();
+            });
+        }
+
+        // Создаем новые звезды каждые 100 мс
+        setInterval(createStar, 100);
+
+        // Пример данных пользователя
+        const userData = {
+            username: "TelegramUser",
+            avatarUrl: "https://via.placeholder.com/100",
+            balance: 1500
+        };
+
+        // Обновляем данные на странице
+        document.getElementById('username').textContent = userData.username;
+        document.getElementById('avatar').src = userData.avatarUrl;
+        document.getElementById('balance').textContent = userData.balance;
+
+        // Интеграция с Telegram Mini App
+        if (window.Telegram && window.Telegram.WebApp) {
+            const webApp = Telegram.WebApp;
+
+            // Получаем данные пользователя
+            const user = webApp.initDataUnsafe.user;
+
+            if (user) {
+                document.getElementById('username').textContent = user.username || "Пользователь";
+                document.getElementById('avatar').src = user.photo_url || "https://via.placeholder.com/100";
+            }
+
+            // Пример баланса
+            document.getElementById('balance').textContent = "1500";
+        }
+
+        // Функции для меню
+        function openWithdraw() {
+            alert('Вывод');
+        }
+
+        function openDeposit() {
+            alert('Депозит');
+        }
+
+        function openSupport() {
+            alert('Поддержка');
+        }
+
+        function openTransactionHistory() {
+            alert('История транзакций');
+        }
+    </script>
+</body>
+</html>
